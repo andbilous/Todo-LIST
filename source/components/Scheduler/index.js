@@ -57,8 +57,12 @@ export default class Scheduler extends Component {
     }
 
     _getAllCompleted = () => {
-        this.state.tasks.every(
-            (task) => task.completed);
+        if (this.state.tasks.every(
+            (task) => task.completed)) {
+            return true;
+        }
+
+        return false;
     }
 
     _createTaskAsync = async (e) => {
