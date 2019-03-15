@@ -16,10 +16,19 @@ export default class Task extends PureComponent {
         newTaskMessage: this.props.message,
     }
     _removeTask = () => {
-
+        this.props._removeTaskAsync(this.props.id);
     }
    _updateTask = () => {
+       const { _updateTaskAsync, message } = this.props;
 
+       if (message === newMessage) {
+           this._setTaskEditingState(false);
+
+           return null;
+       }
+
+       _updateTaskAsync(this._getTaskShape({ message: this.state.newMessage }));
+       this._setTaskEditingState(false);
    }
    _setTaskEditingState= (isTaskEditing) => {
        {
@@ -52,8 +61,25 @@ export default class Task extends PureComponent {
        this._setTaskEditingState(false);
    }
 
-   _updateTaskMessageOnKeyDown = () => {
+   _updateTaskMessageOnKeyDown = (e) => {
 
+       if (!this.state.message.length) {
+           return null;
+       }
+
+       switch (e.key) {
+           case 'Enter': {
+               this._updateTask();
+               break;
+           }
+
+           case 'Escape': {
+               this._cancelUpdatingTaskMessage();
+               break;
+           }
+           default:
+               break;
+       }
    }
    _removeTask = () => {
        this.props._removeTaskAsync(this.props.id);
@@ -88,215 +114,48 @@ export default class Task extends PureComponent {
     });
 
     render () {
+        const currentMessage = this.state.isTaskEditing ? this.state.newMessage : this.props.message;
+
         return (
-            <li
-                className = 'task'>
-                <div
-                    className = 'content'>
-                    <withSvg
-                        Checkbox
-                        checked = { false }
-                        className = 'toggleTaskCompletedState'
-                        color1 = '#3B8EF3'
-                        color2 = '#FFF'
-                        height = { 25 }
+            <li className = { Styles.task }>
+                <div className = { Styles.content }>
+                    <Checkbox
                         inlineBlock
-                        onClick = { [Function] }
-                        width = { 25 }>
-                        <div
-                            className = 'toggleTaskCompletedState'
-                            onClick = { [Function] }
-                            onMouseEnter = { [Function] }
-                            onMouseLeave = { [Function] }>
-                            <svg
-
-                                /*  style={
-               Object {
-                "display": "block",
-                "height": 25,
-                "width": 25,
-              }
-            }  */
-                                version = '1.1'
-                                viewBox = '0 0 27 27'>
-                                <Checkbox
-                                    checked = { false }
-                                    className = 'toggleTaskCompletedState'
-                                    color1 = '#3B8EF3'
-                                    color2 = '#FFF'
-                                    hover = { false }
-                                    inlineBlock>
-                                    <g>
-                                        <rect
-                                            fill = '#FFF'
-                                            height = '25'
-                                            rx = '5'
-                                            ry = '5'
-                                            stroke = '#3B8EF3'
-
-                                            /*  style={
-                    Object {
-                      "strokeWidth": 2,
-                    }
-                  } */
-                                            width = '25'
-                                            x = '1'
-                                            y = '1'
-                                        />
-                                        <path
-                                            d = 'M22.12 6c-3.12 3.16-6.84 6.36-10.23 9.64l-5.42-4.05L4 14.84l6.78 5.08L12.23 21l1.25-1.25C17 16.2 21.29 12.6 25 8.89z'
-                                            fill = '#FFF'
-                                        />
-                                    </g>
-                                </Checkbox>
-                            </svg>
-                        </div>
-                    </withSvg>
+                        checked = { this.props.completed }
+                        className = { Styles.toggleTaskCompletedState }
+                        onClick = { this._toggleTaskCompletedState }
+                    />
                     <input
-                        disabled
+                        disabled = { !this.props.isTaskEditing }
                         maxLength = { 50 }
-                        onChange = { [Function] }
-                        onKeyDown = { [Function] }
+                        ref = { this.taskInput }
                         type = 'text'
-                        value = 'Выполнить важную задачу.'
+                        value = { currentMessage }
+                        onChange = { this._updateNewTaskMessage }
+                        onKeyDown = { this._updateTaskMessageOnKeyDown }
                     />
                 </div>
-                <div
-                    className = 'actions'>
-                    <withSvg
-                        Star
-                        checked = { false }
-                        className = 'toggleTaskFavoriteState'
-                        color1 = '#3B8EF3'
-                        color2 = '#000'
-                        height = { 19 }
+                <div className = { Styles.actions }>
+                    <Star
                         inlineBlock
-                        onClick = { [Function] }
-                        width = { 19 }>
-                        <div
-                            className = 'toggleTaskFavoriteState'
-                            onClick = { [Function] }
-                            onMouseEnter = { [Function] }
-                            onMouseLeave = { [Function] }>
-                            <svg
-
-                                /*  style={
-              Object {
-                "display": "block",
-                "height": 19,
-                "width": 19,
-              }
-            } */
-                                version = '1.1'
-                                viewBox = '0 0 90 85.8'>
-                                <Star
-                                    checked = { false }
-                                    className = 'toggleTaskFavoriteState'
-                                    color1 = '#3B8EF3'
-                                    color2 = '#000'
-                                    hover = { false }
-                                    inlineBlock
-                                    onClick = { [Function] }>
-                                    <g>
-                                        <path
-                                            d = 'M61.6 51.4l5.7 26.4L45 64.5 22.7 77.8l5.7-26.4-19.3-16 24.2-2.8L45 8.7l11.6 23.8 24.2 2.8-19.2 16.1zM88 31.3L59.9 28l-13-26.6C46.6.5 45.8 0 45 0s-1.6.5-1.9 1.4L30.1 28 2 31.3c-1.9 0-2.7 2.4-1.2 3.5L23 53.3l-6.4 29.9c-.4 1.4.6 2.6 1.9 2.6.4 0 .8-.1 1.1-.4L45 70.2l25.4 15.2c.4.3.8.4 1.1.4 1.2 0 2.3-1.2 1.9-2.6L67 53.3l22.2-18.5c1.5-1.1.7-3.5-1.2-3.5z'
-                                            fill = '#000'
-                                        />
-                                    </g>
-                                </Star>
-                            </svg>
-                        </div>
-                    </withSvg>
-                    <withSvg
-                        Edit
-                        checked = { false }
-                        className = 'updateTaskMessageOnClick'
-                        color1 = '#3B8EF3'
-                        color2 = '#000'
-                        height = { 19 }
+                        checked = { this.props.favorite }
+                        className = { Styles.toggleTaskFavoriteState }
+                        onClick = { this._toggleTaskFavoriteState }
+                    />
+                    <Edit
                         inlineBlock
-                        onClick = { [Function] }
-                        width = { 19 }>
-                        <div
-                            className = 'updateTaskMessageOnClick'
-                            onClick = { [Function] }
-                            onMouseEnter = { [Function] }
-                            onMouseLeave = { [Function] }>
-                            <svg
-
-                                /* style={
-              Object {
-                "display": "block",
-                "height": 19,
-                "width": 19,
-              }
-            } */
-                                version = '1.1'
-                                viewBox = '0 0 21 21'>
-                                <Edit
-                                    checked = { false }
-                                    className = 'updateTaskMessageOnClick'
-                                    color1 = '#3B8EF3'
-                                    color2 = '#000'
-                                    hover = { false }
-                                    inlineBlock
-                                    onClick = { [Function] }>
-                                    <g>
-                                        <path
-                                            d = 'M19.4 3.1L18 1.7 8.6 11l1.4 1.4 9.4-9.3zM19.3.3l1.4 1.4c.4.4.4 1 0 1.4L10.5 13.3c-.1.1-.2.2-.3.2l-2.9 1c-.3.1-.7-.1-.8-.4v-.4l1-2.9c0-.1.1-.2.2-.3L17.9.3c.4-.4 1-.4 1.4 0zM17 9h1v9.5c0 1.4-1.1 2.5-2.5 2.5h-13C1.1 21 0 19.9 0 18.5v-13C0 4.1 1.1 3 2.5 3H12v1H2.5C1.7 4 1 4.7 1 5.5v13c0 .8.7 1.5 1.5 1.5h13c.8 0 1.5-.7 1.5-1.5V9z'
-                                            fill = '#000'
-                                        />
-                                    </g>
-                                </Edit>
-                            </svg>
-                        </div>
-                    </withSvg>
-                    <withSvg
-                        Remove
-                        className = 'removeTask'
-                        color1 = '#3B8EF3'
-                        color2 = '#000'
-                        height = { 17 }
+                        checked = { this.props.isTaskEditing }
+                        className = { Styles.updateTaskMessageOnClick }
+                        onClick = { this._updateTaskMessageOnClick }
+                    />
+                    <Remove
                         inlineBlock
-                        onClick = { [Function] }
-                        width = { 17 }>
-                        <div
-                            className = 'removeTask'
-                            onClick = { [Function] }
-                            onMouseEnter = { [Function] }
-                            onMouseLeave = { [Function] }>
-                            <svg
-
-                                /*  style={
-              Object {
-                "display": "block",
-                "height": 17,
-                "width": 17,
-              }
-            } */
-                                version = '1.1'
-                                viewBox = '0 0 53.8 53.8'>
-                                <Remove
-                                    checked = { false }
-                                    className = 'removeTask'
-                                    color1 = '#3B8EF3'
-                                    color2 = '#000'
-                                    hover = { false }
-                                    inlineBlock
-                                    onClick = { [Function] }>
-                                    <g>
-                                        <path
-                                            d = 'M53 49.5c1 1 1 2.6 0 3.5-.5.5-1.1.7-1.8.7-.6 0-1.3-.2-1.8-.7L26.9 30.4 4.3 53c-.5.5-1.1.7-1.8.7-.6 0-1.3-.2-1.8-.7-1-1-1-2.6 0-3.5l22.6-22.6L.7 4.3c-1-1-1-2.6 0-3.5 1-1 2.6-1 3.5 0l22.6 22.6L49.5.7c1-1 2.6-1 3.5 0 1 1 1 2.6 0 3.5L30.4 26.9 53 49.5z'
-                                            fill = '#000'
-                                        />
-                                    </g>
-                                </Remove>
-                            </svg>
-                        </div>
-                    </withSvg>
+                        className = { Styles.removeTask }
+                        onClick = { this._removeTask }
+                    />
                 </div>
             </li>
-
         );
     }
+
 }
