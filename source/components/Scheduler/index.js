@@ -109,6 +109,16 @@ export default class Scheduler extends Component {
     }
 
     render () {
+        const todoList = this.state.tasks
+            .filter((task) => task.message.toLowerCase().includes(this.state.tasksFilter)).map((props) => (
+                <Task
+                    _removeTaskAsync = { this._removeTaskAsync }
+                    _updateTaskAsync = { this._updateTaskAsync }
+                    key = { props.id }
+                    { ...props }
+                />
+            ));
+
         return (
             <section className = { Styles.scheduler }>
                 <Spinner isSpinning = { this.state.isTasksFetching } />
@@ -136,7 +146,7 @@ export default class Scheduler extends Component {
                         </form>
                         <div className = { Styles.overlay }>
                             <ul>
-                                {this.props.todoList}
+                                {todoList}
                             </ul>
                         </div>
                     </section>
