@@ -9,19 +9,20 @@ import Star from '../../theme/assets/Star';
 import Styles from './styles.m.css';
 
 export default class Task extends PureComponent {
-    taskNameInput = createRef();
 
     state={
         isTaskEditing:  false,
         newTaskMessage: this.props.message,
     }
+    taskNameInput = createRef();
+
     _removeTask = () => {
         this.props._removeTaskAsync(this.props.id);
     }
    _updateTask = () => {
        const { _updateTaskAsync, message } = this.props;
 
-       if (message === newMessage) {
+       if (message === this.state.newMessage) {
            this._setTaskEditingState(false);
 
            return null;
@@ -57,7 +58,6 @@ export default class Task extends PureComponent {
 
    _updateTask = () => {
        this.props._updateTaskAsync();
-       this._setTaskEditingState(false);
        this._setTaskEditingState(false);
    }
 

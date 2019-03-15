@@ -72,7 +72,7 @@ export default class Scheduler extends Component {
         const newTask=  api.createTask(this.state.newTaskMessage);
 
         this.setState({
-            tasks:          sortTasksByGroup([newTask, ...tasks]),
+            tasks:          sortTasksByGroup([newTask, ...this.state.tasks]),
             newTaskMessage: '',
         });
         this._setTasksFetchingState(false);
@@ -82,7 +82,7 @@ export default class Scheduler extends Component {
         this._setTasksFetchingState(true);
         await api.removeTask(taskId);
         this.setState({
-            tasks:           tasks.filter((task) => task.id !== taskId),
+            tasks:           this.state.tasks.filter((task) => task.id !== taskId),
             isTasksFetching: false,
         });
         this._setTasksFetchingState(false);
@@ -95,7 +95,7 @@ export default class Scheduler extends Component {
         this._setTasksFetchingState(true);
         await api.completeAllTasks(this.state.tasks);
         this.setState({
-            tasks: sortTasksByGroup(tasks.map((task) => ({
+            tasks: sortTasksByGroup(this.state.tasks.map((task) => ({
                 ...task, completed: true,
             }))),
         });
@@ -118,7 +118,7 @@ export default class Scheduler extends Component {
                         <input
                             placeholder = 'Поиск'
                             type = 'search'
-                            value = { tasksFilter }
+                            value = { this.state.tasksFilter }
                             onChange = { this._updateTasksFilter }
                         />
                     </header>
@@ -127,23 +127,23 @@ export default class Scheduler extends Component {
                             <input
                                 className = { Styles.createTask }
                                 maxLength = { 50 }
-                                onChange = { this._updateNewTaskMessage }
                                 placeholder = 'Описaние моей новой задачи'
                                 type = 'text'
                                 value = { this.state.newTaskMessage }
+                                onChange = { this._updateNewTaskMessage }
                             />
                             <button>Добавить задачу</button>
                         </form>
                         <div className = { Styles.overlay }>
                             <ul>
-                                {todoList}
+                                {this.props.todoList}
                             </ul>
                         </div>
                     </section>
                     <footer>
                         <Checkbox
                             onClick = { this._completeAllTasksAsync }
-                            checked = { allCompleted }
+                            checked = { this._getAllCompleted }
                         />
                         <span className = { Styles.completeAllTasks }>Все задачи выполнены</span>
                     </footer>

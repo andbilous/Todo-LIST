@@ -2,52 +2,58 @@ import { MAIN_URL, TOKEN } from './config';
 export const api = {
 
     async fetchTasks () {
-        await fetch(MAIN_URL, {
+        const response=   await fetch(MAIN_URL, {
             method:  'GET',
             headers: new Headers({
                 'Authorization': TOKEN,
             }),
-        }).then((response) => {
-            if (response.ok) {
-                return response.text();
-            }
         });
+        const { data: tasks } =await response.json();
+
+        if (response.status.ok) {
+            return tasks;
+        } throw new Error('Error while fetching');
     },
+
     async createTask () {
-        await fetch(MAIN_URL, {
+        const response=   await fetch(MAIN_URL, {
             method:  'POST',
             headers: {
                 'Authorization': TOKEN,
+                'Content-Type':  'application/json',
             },
-        }).then((response) => {
-            if (response.ok) {
-                return response.text();
-            }
         });
+        const { data: task } =await response.json();
+
+        if (response.status.ok) {
+            return task;
+        } throw new Error('Task creation error');
     },
     async updateTask () {
-        await fetch(MAIN_URL, {
-            method:  'GET',
+        const response=  await fetch(MAIN_URL, {
+            method:  'PUT',
             headers: {
                 'Authorization': TOKEN,
+                'Content-Type':  'application/json',
             },
-        }).then((response) => {
-            if (response.ok) {
-                return response.text();
-            }
         });
+        const { data: [updatedTask] } = await response.json();
+
+        if (response.status.ok) {
+            return updatedTask;
+        } throw new Error('Task updating error');
     },
     async removeTask () {
-        await fetch(MAIN_URL, {
-            method:  'GET',
+        const response=  await fetch(MAIN_URL, {
+            method:  'DELETE',
             headers: {
                 'Authorization': TOKEN,
             },
-        }).then((response) => {
-            if (response.status===200) {
-                return response.text();
-            }
         });
+
+        if (!response.status.ok) {
+            throw new Error('Task deletion error');
+        }
     },
     async completeAllTasks () {
 
