@@ -67,7 +67,7 @@ export default class Scheduler extends Component {
 
     _createTaskAsync = async (e) => {
         e.preventDefault();
-        if (!this.state.newTaskMessage==='') {
+        if (!this.state.newTaskMessage) {
             await api.createTask(this.state.newTaskMessage);
         } else {
             return null;
